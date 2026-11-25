@@ -24,11 +24,11 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  const { data } = await supabase.auth.getUser();     // validates the JWT with the Auth server
+  const { data } = await supabase.auth.getClaims();   // verifies the token signature locally (fast); refreshes it when expired
   const path = request.nextUrl.pathname;
   const isPublic = PUBLIC.some((p) => path === p || path.startsWith(p + "/"));
 
-  if (!data.user && !isPublic) {
+  if (!data?.claims?.sub && !isPublic) {
     const dest = request.nextUrl.clone();
     dest.pathname = "/login";
     dest.search = "";

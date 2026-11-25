@@ -63,3 +63,9 @@ A customer is bound to a party through `parties.user_id` (unique). Deactivating 
 - `0007_modify_and_billing.sql` — `update_inward`, `update_outward` (insert new rows first, then reversals; outward modify returns stock before validating), `set_role_permission` (Owner only), permissions `inward.update` / `outward.update`.
 - `0008_billing.sql` — view `invoice_balances`; `save_invoice` (drafts), `issue_invoice` (assigns number, debits ledger), `cancel_invoice` (blocked while receipts are allocated), `create_receipt` (+allocations, over-allocation checks), `cancel_receipt`, `create_payment`, `cancel_payment`, `ledger_statement`.
 - `0009_reports.sql` — views `v_inward_lines`, `v_outward_lines`, `v_stock_detail`, `v_labour`; functions `stock_register`, `floor_report` (all 15 floors), `rojmel` (provisional).
+
+## Speed design (migration 0010)
+- `stock_movements` stays the only source of truth. `stock_position` is a small table (one row per party + product + rack) updated by a trigger inside the same transaction as every ledger insert; `stock_balances` reads from it. `select * from public.verify_stock_position()` (run as database owner) compares it to the ledger and must return no rows.
+- RLS policies evaluate role helpers once per query (`(select app.is_internal())`), not once per row.
+- `app_session()` returns profile, role, permissions, party and business name in one call; the app verifies the login token locally (`getClaims`).
+- Measured locally on 3,000,000 ledger rows: stock totals / home summary 13 ms (previously minutes), stock list 1 ms, one month of movements 21 ms.

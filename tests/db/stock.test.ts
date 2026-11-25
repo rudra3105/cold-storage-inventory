@@ -299,3 +299,10 @@ describe("permissions are configurable", () => {
     await expect(asUser(null, (c) => rpc(c, "create_inward", {}, []))).rejects.toThrow(/permission denied/);
   });
 });
+
+describe("fast stock table equals the ledger", () => {
+  it("verify_stock_position reports no differences after all the activity above", async () => {
+    const r = await pool.query("select * from public.verify_stock_position()");
+    expect(r.rows).toEqual([]);
+  });
+});

@@ -50,3 +50,6 @@ Note: `npm run go` creates the Owner directly in the database; the secret key is
 
 ## For daily users
 See `USER_GUIDE.md` — a one-page plain-language guide. The menu is grouped as: Home · Daily work (Goods In, Goods Out, Stock) · Money · Reports · Setup · Owner. Each item shows its traditional name underneath (Inward, Outward, Invoices…).
+
+## Updating an existing database
+After pulling a new version, run `npm run go` once: it applies only the new migrations (already-applied ones are skipped) and starts the app. For fastest results deploy on Vercel in the same region as your Supabase project.
